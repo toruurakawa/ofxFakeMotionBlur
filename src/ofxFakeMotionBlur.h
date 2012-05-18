@@ -10,6 +10,8 @@
 #include "ofMain.h"
 #include <gl/glut.h>
 
+#define TEXNUM 5
+
 class ofxFakeMotionBlur{
 public:
     void setup(){
@@ -23,11 +25,11 @@ public:
 
         stringstream srcFrag;
         srcFrag << "#version 120\n";
-        for(int i=0; i<5; i++){
+        for(int i=0; i<TEXNUM; i++){
             srcFrag << "uniform sampler2D sampler"<< i <<";\n";
         }
         srcFrag << "void main(void) {\n";
-        for(int i=0; i<5; i++){
+        for(int i=0; i<TEXNUM; i++){
             srcFrag << "vec4 texColor"<< i << " = texture2D(sampler"<< i << ", gl_TexCoord[0].st);\n";
         }        
         srcFrag << "vec4 resColor  = (texColor0+texColor1+texColor2+texColor3+texColor4)/5.0;\n";
@@ -51,7 +53,7 @@ public:
     void update(){
         count = (count+1)%4;
         if(count==0){
-            indicator = (indicator+1)%5;
+            indicator = (indicator+1)%TEXNUM;
         }
     };
     
@@ -94,13 +96,13 @@ public:
     
 protected:
     
-    GLuint rbNames[5];
-    GLuint fbNames[5];
-    GLuint texNames[5];
+    GLuint rbNames[TEXNUM];
+    GLuint fbNames[TEXNUM];
+    GLuint texNames[TEXNUM];
     
     void initFramebuffer(){   
         
-        for(int i=0; i<5; i++){
+        for(int i=0; i<TEXNUM; i++){
             //  generate renderbuffer object
             glGenRenderbuffersEXT( 1, &(rbNames[i]) );
             glBindRenderbufferEXT( GL_RENDERBUFFER_EXT, rbNames[i] );
@@ -124,7 +126,7 @@ protected:
     
     void setTexture(){
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        for (GLuint i=0; i<5; i++) {
+        for (GLuint i=0; i<TEXNUM; i++) {
             // generate texture objects for each texture unit
             glGenTextures(1, &(texNames[i])); 
             // switch to  texture unit "i"
@@ -147,7 +149,7 @@ protected:
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, color);
         
         // activate texture units
-        for (GLuint i=0; i<5; i++) {
+        for (GLuint i=0; i<TEXNUM; i++) {
             glActiveTexture(GL_TEXTURE0+i);
             glBindTexture(GL_TEXTURE_2D, texNames[i]);
             glEnable(GL_TEXTURE_2D);    
@@ -156,26 +158,26 @@ protected:
 
         glNormal3d(0.0, 0.0, 1.0);
         glBegin(GL_QUADS);
-        for (GLuint i=0; i<5; i++) {
+        for (GLuint i=0; i<TEXNUM; i++) {
             glMultiTexCoord2d(GL_TEXTURE0+i, 0.0, 1.0);
         }
         glVertex3d(0, 0,  0.0);
-        for (GLuint i=0; i<5; i++) {
+        for (GLuint i=0; i<TEXNUM; i++) {
             glMultiTexCoord2d(GL_TEXTURE0+i, 1.0, 1.0);
         }
         glVertex3d(ofGetWidth(), 0,  0.0);
-        for (GLuint i=0; i<5; i++) {
+        for (GLuint i=0; i<TEXNUM; i++) {
             glMultiTexCoord2d(GL_TEXTURE0+i, 1.0, 0.0);
         }
         glVertex3d( ofGetWidth(), ofGetHeight(),  0.0);
-        for (GLuint i=0; i<5; i++) {
+        for (GLuint i=0; i<TEXNUM; i++) {
             glMultiTexCoord2d(GL_TEXTURE0+i, 0.0, 0.0);
         }
         glVertex3d(0,  ofGetHeight(),  0.0);
         glEnd();
         
         // finish texture mapping
-        for (GLuint i=0; i<5; i++) {
+        for (GLuint i=0; i<TEXNUM; i++) {
             glActiveTexture(GL_TEXTURE0+(4-i));
             glDisable(GL_TEXTURE_2D);
         }
