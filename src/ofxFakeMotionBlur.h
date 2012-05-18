@@ -75,23 +75,12 @@ public:
             shader.end();
     }
     
-    void beginRenderingFbo(){
-        //  begin rendering to FBO 
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbNames[indicator]);
-        //  set texture 
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
-                                  GL_TEXTURE_2D, texNames[indicator], 0);
-        
-        //  set viewport to texture's size
-        glViewport(0, 0, ofGetWidth(), ofGetHeight());
-        
-        //  clear display 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    void begin(){
+        this->beginRenderingFbo();
     }
     
-    void endRenderingFbo(){
-        //  end rendering to FBO
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+    void end(){
+        this->endRenderingFbo();
     }
     
 protected:
@@ -182,6 +171,25 @@ protected:
             glDisable(GL_TEXTURE_2D);
         }
         
+    }
+    
+    void beginRenderingFbo(){
+        //  begin rendering to FBO 
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbNames[indicator]);
+        //  set texture 
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
+                                  GL_TEXTURE_2D, texNames[indicator], 0);
+        
+        //  set viewport to texture's size
+        glViewport(0, 0, ofGetWidth(), ofGetHeight());
+        
+        //  clear display 
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+    
+    void endRenderingFbo(){
+        //  end rendering to FBO
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
     }
     
     GLuint count;

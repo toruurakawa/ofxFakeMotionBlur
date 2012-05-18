@@ -31,13 +31,13 @@ void testApp::update(){
 void testApp::draw(){
     ofBackground(0);
        
-    moBlur.beginRenderingFbo();
+    moBlur.begin();
         xPos+=0.5;
         if(xPos>ofGetWidth()) xPos = 0;
         ofPushMatrix();
             ofBox(xPos, ofGetHeight()/2, 0, 50);
         ofPopMatrix();
-    moBlur.endRenderingFbo();
+    moBlur.end();
     
     moBlur.draw();    
 }
