@@ -32,7 +32,7 @@ void testApp::draw(){
     ofBackground(0);
        
     moBlur.begin();
-        xPos+=0.5;
+        xPos+=1;
         if(xPos>ofGetWidth()) xPos = 0;
         ofPushMatrix();
             ofBox(xPos, ofGetHeight()/2, 0, 50);
@@ -41,7 +41,6 @@ void testApp::draw(){
     
     moBlur.draw();    
 }
-
 
 void testApp::setLight(){
     float   lightAmbient0[] =   {0.5, 0.5, 0.5, 1.0};

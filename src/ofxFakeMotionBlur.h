@@ -10,7 +10,9 @@
 #include "ofMain.h"
 #include <gl/glut.h>
 
-#define TEXNUM 5
+#define TEXNUM 8
+#define TEXWIDTH ofGetWidth()
+#define TEXHEIGHT ofGetHeight()
 
 class ofxFakeMotionBlur{
 public:
@@ -19,7 +21,7 @@ public:
         stringstream srcVert;
         srcVert << "#version 120\n";
         srcVert << "void main(void) {\n";
-        srcVert << "gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\n";
+        srcVert << "gl_Position = ftransform();//gl_ModelViewProjectionMatrix * gl_Vertex;\n";
         srcVert << "gl_TexCoord[0] = gl_MultiTexCoord0;\n";
         srcVert << "}\n";
 
@@ -32,26 +34,32 @@ public:
         for(int i=0; i<TEXNUM; i++){
             srcFrag << "vec4 texColor"<< i << " = texture2D(sampler"<< i << ", gl_TexCoord[0].st);\n";
         }        
-        srcFrag << "vec4 resColor  = (texColor0+texColor1+texColor2+texColor3+texColor4)/5.0;\n";
+        srcFrag << "vec4 resColor;\n";
+        for(int i=0; i<TEXNUM; i++){
+            srcFrag << "resColor += texColor"<<i<<";\n";
+        }
+        srcFrag << "resColor /= "<<TEXNUM<<".;\n";
+        srcFrag << "resColor.a = 1.0;";
         srcFrag << "gl_FragColor = resColor;";
         srcFrag << "}\n";
         
         shader.setupShaderFromSource(GL_VERTEX_SHADER, srcVert.str());
         shader.setupShaderFromSource(GL_FRAGMENT_SHADER, srcFrag.str());
         shader.linkProgram();
-        doShader = true;	
+        doShader = 1;	
         
-        shader.setUniform1i("sampler0", 0); 
-        shader.setUniform1i("sampler1", 1); 
-        shader.setUniform1i("sampler2", 2); 
-        shader.setUniform1i("sampler3", 3); 
-        shader.setUniform1i("sampler4", 4);
+        for(int i=0; i<TEXNUM; i++){
+            char sampler[128];
+            sprintf(sampler, "sampler%d", i);
+            shader.setUniform1i(sampler, i); 
+        }
+
         setTexture();
         initFramebuffer();
     }
     
     void update(){
-        count = (count+1)%4;
+        count = (count+1)%3;
         if(count==0){
             indicator = (indicator+1)%TEXNUM;
         }
@@ -61,11 +69,11 @@ public:
         if(doShader)
             shader.begin();
         
-        shader.setUniform1i("sampler0", 0); 
-        shader.setUniform1i("sampler1", 1); 
-        shader.setUniform1i("sampler2", 2); 
-        shader.setUniform1i("sampler3", 3); 
-        shader.setUniform1i("sampler4", 4);
+        for(int i=0; i<TEXNUM; i++){
+            char sampler[128];
+            sprintf(sampler, "sampler%d", i);
+            shader.setUniform1i(sampler, i); 
+        }
         
         ofPushMatrix();
         drawGLObject();
@@ -96,7 +104,7 @@ protected:
             glGenRenderbuffersEXT( 1, &(rbNames[i]) );
             glBindRenderbufferEXT( GL_RENDERBUFFER_EXT, rbNames[i] );
             //  Z
-            glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, ofGetWidth(), ofGetHeight() );
+            glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, TEXWIDTH, TEXHEIGHT );
             //  generate framebuffer object
             glGenFramebuffersEXT( 1,  &(fbNames[i]) );
             glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, fbNames[i] );
@@ -122,7 +130,7 @@ protected:
             glActiveTexture(GL_TEXTURE0+i);
             glBindTexture(GL_TEXTURE_2D, texNames[i]);  
             // set texture
-            glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,ofGetWidth(),ofGetHeight(),0,GL_RGBA,GL_UNSIGNED_BYTE,0);
+            glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA, TEXWIDTH, TEXHEIGHT, 0,GL_RGBA,GL_UNSIGNED_BYTE,0);
             glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
@@ -143,7 +151,6 @@ protected:
             glBindTexture(GL_TEXTURE_2D, texNames[i]);
             glEnable(GL_TEXTURE_2D);    
         }
-        
 
         glNormal3d(0.0, 0.0, 1.0);
         glBegin(GL_QUADS);
@@ -154,20 +161,20 @@ protected:
         for (GLuint i=0; i<TEXNUM; i++) {
             glMultiTexCoord2d(GL_TEXTURE0+i, 1.0, 1.0);
         }
-        glVertex3d(ofGetWidth(), 0,  0.0);
+        glVertex3d(TEXWIDTH, 0,  0.0);
         for (GLuint i=0; i<TEXNUM; i++) {
             glMultiTexCoord2d(GL_TEXTURE0+i, 1.0, 0.0);
         }
-        glVertex3d( ofGetWidth(), ofGetHeight(),  0.0);
+        glVertex3d( TEXWIDTH, TEXHEIGHT,  0.0);
         for (GLuint i=0; i<TEXNUM; i++) {
             glMultiTexCoord2d(GL_TEXTURE0+i, 0.0, 0.0);
         }
-        glVertex3d(0,  ofGetHeight(),  0.0);
+        glVertex3d(0,  TEXHEIGHT,  0.0);
         glEnd();
         
         // finish texture mapping
-        for (GLuint i=0; i<TEXNUM; i++) {
-            glActiveTexture(GL_TEXTURE0+(4-i));
+        for (int i=TEXNUM-1; i>=0; i--) {
+            glActiveTexture(GL_TEXTURE0+i);
             glDisable(GL_TEXTURE_2D);
         }
         
@@ -181,7 +188,8 @@ protected:
                                   GL_TEXTURE_2D, texNames[indicator], 0);
         
         //  set viewport to texture's size
-        glViewport(0, 0, ofGetWidth(), ofGetHeight());
+        ofDisableSetupScreen();
+        glViewport(0, 0, TEXWIDTH, TEXHEIGHT);
         
         //  clear display 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -190,6 +198,8 @@ protected:
     void endRenderingFbo(){
         //  end rendering to FBO
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+        ofPopView();
+
     }
     
     GLuint count;
