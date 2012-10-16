@@ -8,7 +8,6 @@
 #define _ofxFakeMotionBlur
 
 #include "ofMain.h"
-#include <gl/glut.h>
 
 #define TEXNUM 8
 #define TEXWIDTH ofGetWidth()
