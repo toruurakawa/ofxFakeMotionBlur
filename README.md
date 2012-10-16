@@ -1,4 +1,4 @@
-#ofkFakeMotionBlur
+#ofxFakeMotionBlur
 
   ![alt text](https://raw.github.com/torutoru/ofxFakeMotionBlur/master/img/ss.png)
 
