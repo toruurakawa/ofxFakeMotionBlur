@@ -9,7 +9,7 @@
 
 #include "ofMain.h"
 
-#define TEXNUM 8
+#define TEXNUM 10
 #define TEXWIDTH ofGetWidth()
 #define TEXHEIGHT ofGetHeight()
 
@@ -58,7 +58,7 @@ public:
     }
     
     void update(){
-        count = (count+1)%3;
+        count = (count+1)%1;
         if(count==0){
             indicator = (indicator+1)%TEXNUM;
         }
