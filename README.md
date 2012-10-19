@@ -1,6 +1,6 @@
 #ofxFakeMotionBlur
 
-  ![alt text](https://raw.github.com/torutoru/ofxFakeMotionBlur/master/img/ss.png)
+  ![alt text](https://raw.github.com/toruurakawa/ofxFakeMotionBlur/master/img/ss.png)
 
   simple motion blur addon for openframeworks
 
